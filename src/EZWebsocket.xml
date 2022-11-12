@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget
+    id="jjr+.ezwebsocket.EZWebsocket"
+    pluginWidget="true"
+    needsEntityContext="true"
+    offlineCapable="true"
+    supportedPlatform="Web"
+    xmlns="http://www.mendix.com/widget/1.0/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd"
+>
+    <name>EZ Websocket client</name>
+    <description>Websocket listener widget for use with EZWebsocket module</description>
+    <studioProCategory>Websocket</studioProCategory>
+    <icon>
+        iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAATQSURBVHgB7ZpLbBtFGID/2XWcxIB3DTQQ4dfGUlVyJBcoIFGg9EZaJIQQByQqwbUc6KESBQmQgAtwQ0QCTki0hxIeB15KLyBxqnioRaKx144liCpgN7SuwLGHf0w2bK14d8Y7+6i6n5R4d2a8u/+3M7Oz4wFISUlJSUm5ZiGGYVQgIrrd7l/tdvsPSBAZpUcfAwKvQQRMqhlaLVUPm2vme5AQ1D9t65sbNf0yStgP4UMUAg9rmm5atvU9JACV/YtBwqKu5RuWbccuQXU2opaAHEQJdZTwA8SI6t6JQcJi3BLU4YQ4akJe187btv0jxIC6U2LkfQKQQ1pe/8XasH6CiCFembVy9Sgo8BQEOQGFmynATX7lKIVen/aeMNfWPoQIIRAyVUSlsMI2/cpSSnsU6OONVuukX1mjVDmGzWdXvWU+CwFQIWQsRCvoywrAQdzVvcpiQFgMHtE17Rx2jGdHlWPBKwp5hRC4s6DpOjbZz2FMQhfAEJWA1fJQ/gb9rL1hnxvOd4L/v3wwCb5NoFKp7PXKbzab3wInIs0B6W7iML3Zbp5yEoaDd4N9yJvjNAdPAbuLxdt6aqY9Kh87N7PeNA0QQFRCr997FDvGZa/gt69nDAkKRIyJ0M3uAbRHOYpPqIp6olYxnvcLnoHN4chcufoGCBC5gIWFhQmiTryOdY/vCUThg9Vm42UMb4mnuKiESAWw4K0Lv5/E0Be5vkDh/dWWycYhFCU8HYaEQALwFuqlUqnGU3Z+fj4rEjy2EBODPzzY3CIMCUFrgI71ecVPArvzf1/snOC+88DkkqpRKr8LQx21qIRarTbjVSZwE8CTlLwkCFd798UpypMogc0ejS3B9xxemf9kMpcwwg3wwZFQLpfn3OlBgt++wJAleArAJ5bV26QP8UrIgHLaqQkygt++SA8J2EH8CgHwbQJm2/xORAKrCZXZyu2ygncYJSHwcXkKiUrIZMkZ/kcdeYeN4HiKDiQYRhkkwt0JikhAJoEHDH611XiGDV95JchG6CkgKMGbreCd3S0Jb0HECD8GpUkgdPfs7GzOnYQSjkRdE8YaB0iScF8uO/nZDhIibQ5jD4QkSvg0TgmBRoKSJOxDCZ/EJSHwUFiShPtzE1MfxyFByuuwlwQctZzhOgihDzAJxWJx2p0ctgRp8wE7SyBL55vmHfj5EtdBUEJWUSOVIHVC5EoJZOm/F5bBmP04rwScFX4wq2SWo5IgfUaISYA+fbvXocfd6WISYP+kkjmF86dT7nQmodFoNEEi0gXgLMwL2PCPKjlYqe6q3urOE5GAxzig9uGjYQmykSqABY9370W2jZ3fnqtBgrRXS3fwbvB9/ed+B/aZF8zf3OnGjHELcNIhnYvr6+uXdjzv3Jzm9d16vW575UsRMCp4h1ESkkDgJuAXPMNpDsbMDPddj4rgk6IAlznL7SHTudPDfULcSGkCg4UUnGsNKXD9JCYP2n+13modG5Ut5edxkSU1ZPCYj/CPkHvx5/MpvMavISwBohKiBk3cgxKm8Rq/Gs6TukAi6RJ0rXCdZVtfutOlrxBJuIS7db1wvVtCKEtkEi0BYG9BL+TxGr9g+6GtEUq4hLsKuq6xdUWhL5Njj0jsiZ+DBEL7/cin4VNSUlJSUlKSw7+KwnCuTd5nrQAAAABJRU5ErkJggg==
+    </icon>
+    <properties>
+        <propertyGroup caption="General">
+            <property key="objectId" type="expression" required="true">
+                <caption>Object Id</caption>
+                <description>Unique identifier of the context object</description>
+                <returnType type="String" />
+            </property>
+            <property key="websocketEndpoint" type="expression" required="true">
+                <caption>Websocket identifier</caption>
+                <description>Must match the websocketIdentifier configured in the Initialize action</description>
+                <returnType type="String" />
+            </property>
+            <property key="actionConfig" type="object" isList="true" required="false">
+                <caption>Action configuration</caption>
+                <description />
+                <properties>
+                    <propertyGroup caption="Action">
+                        <property key="trigger" type="string">
+                            <caption>Trigger</caption>
+                            <description>Key used to identify which action should be performed</description>
+                        </property>
+                        <property key="action" type="action">
+                            <caption>Action</caption>
+                            <description />
+                        </property>
+                    </propertyGroup>
+                </properties>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Websocket close behaviour">
+            <property key="timeoutAction" type="action">
+                <caption>Timeout action</caption>
+                <description>Action to perform when websocket connection closes due to a session timeout</description>
+            </property>
+            <property key="navigateAction" type="action">
+                <caption>Navigate action</caption>
+                <description>Action to perform when websocket connection closes due to the user navigating away</description>
+            </property>
+        </propertyGroup>
+    </properties>
+</widget>
