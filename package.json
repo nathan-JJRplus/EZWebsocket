@@ -2,7 +2,7 @@
   "name": "ezwebsocket",
   "widgetName": "EZWebsocket",
   "version": "1.0.0",
-  "description": "",
+  "description": "Websocket implementation for Mendix",
   "copyright": "© 2022 JJR+ BV",
   "author": "Nathan Ruth",
   "engines": {
