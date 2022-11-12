@@ -1,6 +1,6 @@
 # EZWebSocket
 
-Allow for real-time server to client communication using websockets No third-party dependencies No runtime configuration
+Allow for real-time server to client communication using websockets without external dependencies or runtime configuration
 
 ## Features
 
