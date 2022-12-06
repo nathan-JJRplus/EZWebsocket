@@ -1,0 +1,41 @@
+/**
+ * This file was generated from EZWebsocket.xml
+ * WARNING: All changes made to this file will be overwritten
+ * @author Mendix UI Content Team
+ */
+import { CSSProperties } from "react";
+import { ActionValue, DynamicValue } from "mendix";
+
+export interface ActionConfigType {
+    trigger: string;
+    action?: ActionValue;
+}
+
+export interface ActionConfigPreviewType {
+    trigger: string;
+    action: {} | null;
+}
+
+export interface EZWebsocketContainerProps {
+    name: string;
+    class: string;
+    style?: CSSProperties;
+    tabIndex?: number;
+    objectId: DynamicValue<string>;
+    websocketEndpoint: DynamicValue<string>;
+    actionConfig: ActionConfigType[];
+    timeoutAction?: ActionValue;
+    navigateAction?: ActionValue;
+}
+
+export interface EZWebsocketPreviewProps {
+    className: string;
+    style: string;
+    styleObject?: CSSProperties;
+    readOnly: boolean;
+    objectId: string;
+    websocketEndpoint: string;
+    actionConfig: ActionConfigPreviewType[];
+    timeoutAction: {} | null;
+    navigateAction: {} | null;
+}
