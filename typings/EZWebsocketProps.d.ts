@@ -21,11 +21,12 @@ export interface EZWebsocketContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
+    websocketIdentifier: DynamicValue<string>;
     objectId: DynamicValue<string>;
-    websocketEndpoint: DynamicValue<string>;
     actionConfig: ActionConfigType[];
     timeoutAction?: ActionValue;
     navigateAction?: ActionValue;
+    onCloseMicroflowParameterValue?: DynamicValue<string>;
 }
 
 export interface EZWebsocketPreviewProps {
@@ -33,9 +34,10 @@ export interface EZWebsocketPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    websocketIdentifier: string;
     objectId: string;
-    websocketEndpoint: string;
     actionConfig: ActionConfigPreviewType[];
     timeoutAction: {} | null;
     navigateAction: {} | null;
+    onCloseMicroflowParameterValue: string;
 }

@@ -17,14 +17,14 @@
     </icon>
     <properties>
         <propertyGroup caption="General">
+            <property key="websocketIdentifier" type="expression" required="true">
+                <caption>Websocket identifier</caption>
+                <description>Must match the websocketIdentifier configured in the Initialize action</description>
+                <returnType type="String" />
+            </property>
             <property key="objectId" type="expression" required="true">
                 <caption>Object Id</caption>
                 <description>Unique identifier of the context object</description>
-                <returnType type="String" />
-            </property>
-            <property key="websocketEndpoint" type="expression" required="true">
-                <caption>Websocket identifier</caption>
-                <description>Must match the websocketIdentifier configured in the Initialize action</description>
                 <returnType type="String" />
             </property>
             <property key="actionConfig" type="object" isList="true" required="false">
@@ -51,7 +51,12 @@
             </property>
             <property key="navigateAction" type="action">
                 <caption>Navigate action</caption>
-                <description>Action to perform when websocket connection closes due to the user navigating away</description>
+                <description>Action to perform when websocket connection closes due to the user navigating away (does not fire when the tab/browser is closed)</description>
+            </property>
+            <property key="onCloseMicroflowParameterValue" type="expression" required="false"> 
+                <caption>On close MF parameter</caption>
+                <description>Parameter value to be passed to the on close microflow, if configured</description>
+                <returnType type="String" />
             </property>
         </propertyGroup>
     </properties>

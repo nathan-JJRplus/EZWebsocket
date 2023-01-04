@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useRef } from "react";
 import { EZWebsocketContainerProps } from "typings/EZWebsocketProps";
 
-export function EZWebsocket({ objectId, websocketEndpoint, actionConfig, timeoutAction, navigateAction }: EZWebsocketContainerProps) {
+export function EZWebsocket({ objectId, websocketIdentifier, actionConfig, timeoutAction, navigateAction, onCloseMicroflowParameterValue }: EZWebsocketContainerProps) {
     // Persist connection throughout render cycles
     const connection: MutableRefObject<WebSocket | null> = useRef(null);
 
@@ -10,9 +10,9 @@ export function EZWebsocket({ objectId, websocketEndpoint, actionConfig, timeout
         connection.current === null &&
             // Make sure all values are initiated
             objectId.status === "available" &&
-            websocketEndpoint.status === "available" &&
+            websocketIdentifier.status === "available" &&
             startConnection();
-    }, [objectId, websocketEndpoint]);
+    }, [objectId, websocketIdentifier]);
 
     useEffect(() => {
         return () => {
@@ -24,13 +24,18 @@ export function EZWebsocket({ objectId, websocketEndpoint, actionConfig, timeout
     const startConnection = () => {
         // Open websocket connection
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
+        // Ts-ignore needed as we use the global variable "mx"
         // @ts-ignore
-        let ws = new WebSocket(mx.appUrl.replace(/http/, "ws") + websocketEndpoint.value);
+        let ws = new WebSocket(mx.appUrl.replace(/http/, "ws") + websocketIdentifier.value);
 
         ws.onopen = _event => {
-            // Send objectId to wsserver on opening of connection
+            // Send objectId and onCloseMicroflowParamterValue to wsserver on opening of connection
             // to connect the current session to the object
-            ws.send(objectId.value as string);
+            const parameters = {
+                "objectId": objectId.value,
+                "onCloseMicroflowParameterValue": onCloseMicroflowParameterValue?.value
+            }
+            ws.send(JSON.stringify(parameters));
         };
 
         ws.onmessage = event => {

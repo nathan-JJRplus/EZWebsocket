@@ -14,28 +14,32 @@ import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketUtils;
 
 /**
- * Notifies all the clients subscribed to the context object with an action trigger
- * In the client widget, configure the action that should be executed
+ * Use this inside your after startup flow to initialize the websocket server
+ * 
+ * 
  */
-public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
+public class JA_AddWebsocketEndpoint_WithOnCloseMicroflow extends CustomJavaAction<java.lang.Boolean>
 {
 	private java.lang.String websocketIdentifier;
-	private java.lang.String objectId;
-	private java.lang.String action;
+	private java.lang.Long sessionTimeout;
+	private java.lang.String onCloseMicroflow;
+	private java.lang.String onCloseMicroflowParameterKey;
 
-	public JA_Notify(IContext context, java.lang.String websocketIdentifier, java.lang.String objectId, java.lang.String action)
+	public JA_AddWebsocketEndpoint_WithOnCloseMicroflow(IContext context, java.lang.String websocketIdentifier, java.lang.Long sessionTimeout, java.lang.String onCloseMicroflow, java.lang.String onCloseMicroflowParameterKey)
 	{
 		super(context);
 		this.websocketIdentifier = websocketIdentifier;
-		this.objectId = objectId;
-		this.action = action;
+		this.sessionTimeout = sessionTimeout;
+		this.onCloseMicroflow = onCloseMicroflow;
+		this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
 	}
 
 	@java.lang.Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		WebsocketUtils.notify(objectId, action, websocketIdentifier);
+		WebsocketUtils.addWebsocketEndpointWithOnCloseMicroflow(websocketIdentifier, sessionTimeout, onCloseMicroflow,
+				onCloseMicroflowParameterKey);
 		return true;
 		// END USER CODE
 	}
@@ -47,7 +51,7 @@ public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 	@java.lang.Override
 	public java.lang.String toString()
 	{
-		return "JA_Notify";
+		return "JA_AddWebsocketEndpoint_WithOnCloseMicroflow";
 	}
 
 	// BEGIN EXTRA CODE
