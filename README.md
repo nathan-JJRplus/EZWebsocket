@@ -14,11 +14,13 @@ Allow for real-time server to client communication using websockets without exte
 
 -   [x] Configure action to perform on user navigating away
 
+-   [x] **v1.1.0 update** Configure server-side microflow to be fired on websocket close
+
 ## Usage
 
 ### Initialize webserver
 
-1. Add `JA_AddWebsocketEndpoint` to your afterstartup flow
+1. Add `JA_AddWebsocketEndpoint` or `JA_AddWebsocketEndpoint_WithOnCloseMicroflow` to your afterstartup flow
 
 2. Create a websocketidentifier, this will also be the path to the websocketserver
 
@@ -26,6 +28,12 @@ Allow for real-time server to client communication using websockets without exte
 > widget
 
 3. Optionally fill in the max idle time for users to this session
+
+If you initialize the websocket with the `JA_AddWebsocketEndpoint_WithOnCloseMicroflow` action you will need to configure the following as well:
+
+4. Select the `onCloseMicroflow`, the microflow can contain one string parameter
+
+5. Fill in the name of the string parameter inside `onCloseMicroflowParameterKey`
 
 ### Setup client connection
 
@@ -53,6 +61,12 @@ on sessiontimeout here
 -   User closes the page
 
 -   The component becomes invisible
+
+>   This does not get fired if the user closes the tab or the browser, use the onCloseMicroflow functionality instead
+
+**On close MF parameter**: Only use this if the websocket is initialized using the `JA_AddWebsocketEndpoint_WithOnCloseMicroflow` action
+
+- This is the string parameter that will be passed to the on close microflow
 
 ### Notify all subscribers
 
