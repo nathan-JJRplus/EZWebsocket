@@ -1,6 +1,7 @@
 package ezwebsocket;
 
 import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
@@ -12,9 +13,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collection;
 
 import com.mendix.core.Core;
 import com.mendix.logging.ILogNode;
+import com.mendix.systemwideinterfaces.core.ISession;
 
 import com.mendix.thirdparty.org.json.JSONObject;
 
@@ -42,14 +45,13 @@ public class WebsocketEndpoint extends Endpoint {
   void notify(String objectId, String action) {
     // Retrieve all subscriptions by objectId
     Set<Async> remotes = this.getSubscriptions(objectId);
-
     // Send actiontrigger to all sessions
     for (Async remote : remotes) {
       try {
         remote.sendText(action);
-      } catch (RuntimeException e) {
+      } catch (RuntimeException re) {
         if (LOG.isDebugEnabled())
-          LOG.debug("RuntimeException while sending: " + e.getMessage());
+          LOG.debug("RuntimeException while sending: " + re.getMessage());
       }
     }
   }
@@ -58,10 +60,16 @@ public class WebsocketEndpoint extends Endpoint {
   private Map<Session, Map<String, String>> subscriptions = new HashMap<Session, Map<String, String>>();
 
   private void addSubscription(Session session, String jsonData) {
-    Map<String, String> parameters = parseJsonData(jsonData);
-    if (LOG.isTraceEnabled())
-      LOG.trace("Adding subscription: " + session.getId() + " for objectId: " + parameters.get("objectId"));
-    subscriptions.put(session, parameters);
+    try {
+      Map<String, String> parameters = parseJsonData(jsonData);
+      validateSession(parameters.get("csrfToken"));
+      if (LOG.isTraceEnabled())
+        LOG.trace("Adding subscription: " + session.getId() + " for objectId: " + parameters.get("objectId"));
+      subscriptions.put(session, parameters);
+    } catch (RuntimeException re) {
+      throw new RuntimeException("Connection refused: " + re.getMessage());
+    }
+
   }
 
   private void removeSubscription(Session session) {
@@ -97,16 +105,14 @@ public class WebsocketEndpoint extends Endpoint {
       public void onMessage(String jsonData) {
         // The only message the server expects is the message sent from the widget on
         // connection open
-        // which is the objectId to subscribe the session to
-        if (jsonData.isEmpty()) {
-          try {
-            session.close();
-          } catch (IOException e) {
-            if (LOG.isDebugEnabled())
-              LOG.debug(e.toString());
-          }
-        } else {
+        try {
           addSubscription(session, jsonData);
+        } catch (RuntimeException e) {
+          try {
+            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage()));
+          } catch (IOException ioe) {
+            LOG.error(ioe);
+          }
         }
       }
     });
@@ -114,19 +120,37 @@ public class WebsocketEndpoint extends Endpoint {
 
   @Override
   public void onClose(Session session, CloseReason closeReason) {
-    removeSubscription(session);
+    if (subscriptions.containsKey(session))
+      removeSubscription(session);
     if (LOG.isDebugEnabled())
-      LOG.debug("Received onClose call with reason: " + closeReason);
+      LOG.debug("Received onClose call with reason: " + closeReason.getCloseCode() + ", " + closeReason.getReasonPhrase());
   }
 
   private Map<String, String> parseJsonData(String jsonData) {
-    JSONObject json = new JSONObject(jsonData);
-    String objectId = json.getString("objectId");
-    String onCloseMicroflowParameterValue = json.optString("onCloseMicroflowParameterValue");
-    Map<String, String> parameters = new HashMap<String, String>();
-    parameters.put("objectId", objectId);
-    parameters.put("onCloseMicroflowParameterValue", onCloseMicroflowParameterValue);
-    return parameters;
+    try {
+      JSONObject json = new JSONObject(jsonData);
+      String objectId = json.getString("objectId");
+      String csrfToken = json.getString("csrfToken");
+      String onCloseMicroflowParameterValue = json.optString("onCloseMicroflowParameterValue");
+      Map<String, String> parameters = new HashMap<String, String>();
+      parameters.put("objectId", objectId);
+      parameters.put("csrfToken", csrfToken);
+      parameters.put("onCloseMicroflowParameterValue", onCloseMicroflowParameterValue);
+      return parameters;
+    } catch (RuntimeException re) {
+      throw new RuntimeException("Invalid payload: " + re.getMessage());
+    }
+
+  }
+
+  private boolean validateSession(String csrfToken) {
+    Collection<? extends ISession> activeSessions = Core.getActiveSessions();
+    while (activeSessions.iterator().hasNext()) {
+      ISession session = activeSessions.iterator().next();
+      if (session.getCsrfToken().equals(csrfToken))
+        return true;
+    }
+    throw new RuntimeException("Invalid csrfToken");
   }
 
 }

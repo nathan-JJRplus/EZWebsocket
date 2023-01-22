@@ -1,7 +1,21 @@
 import { MutableRefObject, useEffect, useRef } from "react";
 import { EZWebsocketContainerProps } from "typings/EZWebsocketProps";
+import {} from "mendix";
 
-export function EZWebsocket({ objectId, websocketIdentifier, actionConfig, timeoutAction, navigateAction, onCloseMicroflowParameterValue }: EZWebsocketContainerProps) {
+declare global {
+    interface Window {
+        mx: any;
+    }
+}
+
+export function EZWebsocket({
+    objectId,
+    websocketIdentifier,
+    actionConfig,
+    timeoutAction,
+    navigateAction,
+    onCloseMicroflowParameterValue
+}: EZWebsocketContainerProps) {
     // Persist connection throughout render cycles
     const connection: MutableRefObject<WebSocket | null> = useRef(null);
 
@@ -24,17 +38,16 @@ export function EZWebsocket({ objectId, websocketIdentifier, actionConfig, timeo
     const startConnection = () => {
         // Open websocket connection
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
-        // Ts-ignore needed as we use the global variable "mx"
-        // @ts-ignore
-        let ws = new WebSocket(mx.appUrl.replace(/http/, "ws") + websocketIdentifier.value);
+        let ws = new WebSocket(window.mx.appUrl.replace(/http/, "ws") + websocketIdentifier.value);
 
         ws.onopen = _event => {
-            // Send objectId and onCloseMicroflowParamterValue to wsserver on opening of connection
+            // Send objectId, csrftoken and onCloseMicroflowParamterValue to wsserver on opening of connection
             // to connect the current session to the object
             const parameters = {
-                "objectId": objectId.value,
-                "onCloseMicroflowParameterValue": onCloseMicroflowParameterValue?.value
-            }
+                objectId: objectId.value,
+                csrfToken: window.mx.session.getConfig("csrftoken"),
+                onCloseMicroflowParameterValue: onCloseMicroflowParameterValue?.value
+            };
             ws.send(JSON.stringify(parameters));
         };
 

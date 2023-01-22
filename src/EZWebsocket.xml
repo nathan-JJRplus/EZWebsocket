@@ -45,19 +45,23 @@
             </property>
         </propertyGroup>
         <propertyGroup caption="Websocket close behaviour">
-            <property key="timeoutAction" type="action">
-                <caption>Timeout action</caption>
-                <description>Action to perform when websocket connection closes due to a session timeout</description>
-            </property>
-            <property key="navigateAction" type="action">
-                <caption>Navigate action</caption>
-                <description>Action to perform when websocket connection closes due to the user navigating away (does not fire when the tab/browser is closed)</description>
-            </property>
-            <property key="onCloseMicroflowParameterValue" type="expression" required="false"> 
-                <caption>On close MF parameter</caption>
-                <description>Parameter value to be passed to the on close microflow, if configured</description>
-                <returnType type="String" />
-            </property>
+            <propertyGroup caption="Client side">
+                <property key="timeoutAction" type="action">
+                    <caption>Timeout action</caption>
+                    <description>Action to perform when websocket connection closes due to a session timeout</description>
+                </property>
+                <property key="navigateAction" type="action">
+                    <caption>Navigate action</caption>
+                    <description>Action to perform when websocket connection closes due to the user navigating away (does not fire when the tab/browser is closed)</description>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Server side">
+                <property key="onCloseMicroflowParameterValue" type="expression" required="false">
+                    <caption>On close MF parameter</caption>
+                    <description>Parameter value to be passed to the on close microflow, if configured</description>
+                    <returnType type="String" />
+                </property>
+            </propertyGroup>
         </propertyGroup>
     </properties>
 </widget>
