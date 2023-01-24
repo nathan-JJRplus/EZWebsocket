@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Collection;
 
 import com.mendix.core.Core;
@@ -144,9 +145,10 @@ public class WebsocketEndpoint extends Endpoint {
   }
 
   private boolean validateSession(String csrfToken) {
-    Collection<? extends ISession> activeSessions = Core.getActiveSessions();
-    while (activeSessions.iterator().hasNext()) {
-      ISession session = activeSessions.iterator().next();
+    Iterator<? extends ISession> activeSessions = Core.getActiveSessions().iterator();
+    while (activeSessions.hasNext()) {
+      ISession session = activeSessions.next();
+      LOG.trace("check");
       if (session.getCsrfToken().equals(csrfToken))
         return true;
     }
