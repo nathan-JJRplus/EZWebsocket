@@ -1,7 +1,7 @@
 {
   "name": "ezwebsocketnative",
   "widgetName": "EZWebsocketNative",
-  "version": "1.0.0",
+  "version": "1.5.1",
   "description": "Native widget extension for EZ Websocket module",
   "copyright": "© 2023 JJR+ BV - All Rights Reserved.",
   "author": "Nathan Ruth",

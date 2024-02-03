@@ -6,7 +6,7 @@ import { Style } from "@mendix/pluggable-widgets-tools";
 import { EZWebsocketNativeProps } from "../typings/EZWebsocketNativeProps";
 
 declare global {
-    var mx: any;
+    var mx: any; // eslint-disable-line no-var
 }
 
 export interface CustomStyle extends Style {
@@ -28,12 +28,17 @@ export function EZWebsocketNative({
 
     useEffect(() => {
         // Check if there is no open connection already
-        connection.current === null &&
+        if (
+            connection.current === null &&
             // Make sure all values are initiated
             objectId.status === "available" &&
             websocketIdentifier.status === "available" &&
+            (!messageAttribute || messageAttribute.status === "available") &&
+            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available")
+        ) {
             startConnection();
-    }, [objectId, websocketIdentifier]);
+        }
+    }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue]);
 
     useEffect(() => {
         return () => {
@@ -45,8 +50,8 @@ export function EZWebsocketNative({
     const startConnection = () => {
         // Open websocket connection
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
-        let ws = new WebSocket(global.mx.remoteUrl.replace(/http/, "ws") + websocketIdentifier.value);
-        
+        const ws = new WebSocket(global.mx.remoteUrl.replace(/http/, "ws") + websocketIdentifier.value);
+
         ws.onopen = _event => {
             // Send objectId, csrftoken and onCloseMicroflowParamterValue to wsserver on opening of connection
             // to connect the current session to the object
@@ -64,7 +69,7 @@ export function EZWebsocketNative({
             //    "action": "<actiontrigger>",
             //    "message": "<message>"
             // }
-            let payload = JSON.parse(event.data);
+            const payload = JSON.parse(event.data);
             setMessage(payload.message);
             executeAction(payload.action);
         };
@@ -72,18 +77,24 @@ export function EZWebsocketNative({
         ws.onclose = event => {
             console.debug(event);
             // Timeout event
-            event.code === 1001 && timeoutAction && timeoutAction.canExecute && timeoutAction.execute();
+            if (event.code === 1001 && timeoutAction && timeoutAction.canExecute) {
+                timeoutAction.execute();
+            }
             // Navigate away/close page/unrender event
-            event.code === 1005 && navigateAction && navigateAction.canExecute && navigateAction.execute();
+            if (event.code === 1005 && navigateAction && navigateAction.canExecute) {
+                navigateAction.execute();
+            }
         };
 
         // Store connection inside ref so we can keep track through rendercycles
         connection.current = ws;
 
         const executeAction = (action: string) => {
-            if (!action) return;
+            if (!action) {
+                return;
+            }
             // Find the action to execute for the received triggerstring
-            let config = actionConfig.find(config => {
+            const config = actionConfig.find(config => {
                 return config.trigger === action;
             });
             if (!config) {
@@ -91,19 +102,23 @@ export function EZWebsocketNative({
                 return;
             }
             console.debug("Execute action: " + action);
-            config.action && config.action.canExecute
-                ? config.action.execute()
-                : console.error("Action " + action + " could not be executed");
+            if (config.action && config.action.canExecute) {
+                config.action.execute();
+            } else {
+                console.error("Action " + action + " could not be executed");
+            }
         };
-    
+
         const setMessage = (message: string) => {
-            if (!message) return;
+            if (!message) {
+                return;
+            }
             if (!messageAttribute) {
-                console.debug("messageAttribute not set"); 
+                console.debug("messageAttribute not set");
                 return;
             }
             if (messageAttribute?.readOnly) {
-                console.debug("cannot set messageAttribute, as it is readOnly"); 
+                console.debug("cannot set messageAttribute, as it is readOnly");
                 return;
             }
             messageAttribute.setValue(message);
