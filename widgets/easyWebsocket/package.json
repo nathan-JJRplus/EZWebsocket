@@ -1,7 +1,7 @@
 {
   "name": "ezwebsocket",
   "widgetName": "EZWebsocket",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Websocket implementation for Mendix",
   "copyright": "© 2022 JJR+ BV - All Rights Reserved.",
   "author": "Nathan Ruth",
@@ -10,7 +10,7 @@
   },
   "license": "MIT",
   "config": {
-    "projectPath": "../../tests/testProject",
+    "projectPath": "../tests/testProject",
     "mendixHost": "http://localhost:8080",
     "developmentPort": 3000
   },
@@ -25,7 +25,7 @@
     "release": "pluggable-widgets-tools release:web"
   },
   "devDependencies": {
-    "@mendix/pluggable-widgets-tools": "^9.17.0",
+    "@mendix/pluggable-widgets-tools": "^10.7.2",
     "@types/big.js": "^6.0.2",
     "@types/react": "~17.0.1",
     "@types/react-dom": "~17.0.1"

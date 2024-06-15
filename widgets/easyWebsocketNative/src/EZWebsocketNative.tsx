@@ -34,7 +34,10 @@ export function EZWebsocketNative({
             objectId.status === "available" &&
             websocketIdentifier.status === "available" &&
             (!messageAttribute || messageAttribute.status === "available") &&
-            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available")
+            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
+            (!actionConfig || !actionConfig.find(config => {
+                return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
+            }))
         ) {
             startConnection();
         }

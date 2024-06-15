@@ -20,18 +20,24 @@ import ezwebsocket.WebsocketUtils;
  */
 public class JA_AddWebsocketEndpoint_WithOnCloseMicroflow extends CustomJavaAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.Long sessionTimeout;
-	private java.lang.String onCloseMicroflow;
-	private java.lang.String onCloseMicroflowParameterKey;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.Long sessionTimeout;
+	private final java.lang.String onCloseMicroflow;
+	private final java.lang.String onCloseMicroflowParameterKey;
 
-	public JA_AddWebsocketEndpoint_WithOnCloseMicroflow(IContext context, java.lang.String websocketIdentifier, java.lang.Long sessionTimeout, java.lang.String onCloseMicroflow, java.lang.String onCloseMicroflowParameterKey)
+	public JA_AddWebsocketEndpoint_WithOnCloseMicroflow(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.Long _sessionTimeout,
+		java.lang.String _onCloseMicroflow,
+		java.lang.String _onCloseMicroflowParameterKey
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.sessionTimeout = sessionTimeout;
-		this.onCloseMicroflow = onCloseMicroflow;
-		this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.sessionTimeout = _sessionTimeout;
+		this.onCloseMicroflow = _onCloseMicroflow;
+		this.onCloseMicroflowParameterKey = _onCloseMicroflowParameterKey;
 	}
 
 	@java.lang.Override

@@ -20,14 +20,18 @@ import ezwebsocket.WebsocketUtils;
  */
 public class JA_AddWebsocketEndpoint extends CustomJavaAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.Long sessionTimeout;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.Long sessionTimeout;
 
-	public JA_AddWebsocketEndpoint(IContext context, java.lang.String websocketIdentifier, java.lang.Long sessionTimeout)
+	public JA_AddWebsocketEndpoint(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.Long _sessionTimeout
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.sessionTimeout = sessionTimeout;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.sessionTimeout = _sessionTimeout;
 	}
 
 	@java.lang.Override
