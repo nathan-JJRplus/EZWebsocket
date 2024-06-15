@@ -41,7 +41,7 @@ export function EZWebsocketNative({
         ) {
             startConnection();
         }
-    }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue]);
+    }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue, actionConfig]);
 
     useEffect(() => {
         return () => {
