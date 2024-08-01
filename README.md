@@ -18,7 +18,9 @@ Allow for real-time server to client communication using websockets without exte
 
 -   [X] **v1.3.0 update** Added listener widget for native
 
--   [X] **v.1.4.0 update** Added message feature
+-   [X] **v1.4.0 update** Added message feature
+
+-   [X] **v1.4.2 update** Added multi-instance support as a separate addon module [link](https://marketplace.mendix.com/link/component/227663)
 
 ## Usage
 
@@ -95,7 +97,3 @@ on sessiontimeout here
 ## Issues, suggestions and feature requests
 
 [Issues](https://github.com/nathan-JJRplus/EZWebsocket/issues)
-
-## Known issues
-
-No support for multi-instance yet
