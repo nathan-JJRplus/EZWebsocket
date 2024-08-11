@@ -61,14 +61,19 @@ export function EZWebsocket({
         };
 
         ws.onmessage = event => {
+            if (event.data !== "ping") {
             // eventdata looks like this:
             // {
             //    "action": "<actiontrigger>",
             //    "message": "<message>"
             // }
-            const payload = JSON.parse(event.data);
-            setMessage(payload.message);
-            executeAction(payload.action);
+                const payload = JSON.parse(event.data);
+                setMessage(payload.message);
+                executeAction(payload.action);
+            } else {
+                ws.send("pong");
+            }  
+
         };
 
         ws.onclose = event => {

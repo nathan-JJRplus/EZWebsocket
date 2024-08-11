@@ -37,13 +37,20 @@ public class SessionManager {
         if (!isValidSession(csrfToken)) {
             throw new RuntimeException("Invalid csrfToken");
         }
-
         if (LOG.isTraceEnabled()) {
             LOG.trace("Adding subscription: " + session.getId() + " for objectId: " + objectId);
+        }
+        
+        if (sessions.containsKey(session)) {
+            throw new RuntimeException("Session already registered");
         }
         // Create wrappedSession object and place inside objectId subscription bucket
         WrappedSession wrappedSession = new WrappedSession(session, objectId, onCloseMicroflowParameterValue);
         addSession(wrappedSession);
+    }
+
+    void handlePong(Session session) {
+        sessions.get(session).handlePong();
     }
 
     void notify(String objectId, String payload) {
@@ -112,4 +119,5 @@ public class SessionManager {
             throw new RuntimeException(ce);
         }
     }
+
 }

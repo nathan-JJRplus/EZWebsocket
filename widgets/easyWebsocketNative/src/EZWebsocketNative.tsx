@@ -35,9 +35,10 @@ export function EZWebsocketNative({
             websocketIdentifier.status === "available" &&
             (!messageAttribute || messageAttribute.status === "available") &&
             (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
-            (!actionConfig || !actionConfig.find(config => {
-                return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
-            }))
+            (!actionConfig ||
+                !actionConfig.find(config => {
+                    return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
+                }))
         ) {
             startConnection();
         }
@@ -67,14 +68,18 @@ export function EZWebsocketNative({
         };
 
         ws.onmessage = event => {
+            if (event.data !== "ping") {
             // eventdata looks like this:
             // {
             //    "action": "<actiontrigger>",
             //    "message": "<message>"
             // }
-            const payload = JSON.parse(event.data);
-            setMessage(payload.message);
-            executeAction(payload.action);
+                const payload = JSON.parse(event.data);
+                setMessage(payload.message);
+                executeAction(payload.action);
+            } else {
+                ws.send("pong");
+            }
         };
 
         ws.onclose = event => {

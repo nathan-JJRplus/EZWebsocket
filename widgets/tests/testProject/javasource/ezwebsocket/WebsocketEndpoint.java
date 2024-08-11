@@ -46,10 +46,13 @@ public class WebsocketEndpoint extends Endpoint {
       @Override
       public void onMessage(String data) {
         try {
-          addSubscription(session, data);
+          if (data.equals("pong")) {
+            sessionManager.handlePong(session);
+          } else {
+            addSubscription(session, data);
+          }
         } catch (RuntimeException e) {
           try {
-            LOG.error(e);
             session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage()));
           } catch (IOException ioe) {
             LOG.error(ioe);
@@ -83,11 +86,9 @@ public class WebsocketEndpoint extends Endpoint {
 
       sessionManager.registerSubscription(session, csrfToken, objectId, onCloseMicroflowParameterValue);
 
-    } 
-    catch (JSONException je) {
+    } catch (JSONException je) {
       LOG.error("Error occured during parsing JSONdata: ", je);
-    }
-    catch (RuntimeException re) {
+    } catch (RuntimeException re) {
       throw new RuntimeException("Connection refused: " + re.getMessage());
     }
   }
