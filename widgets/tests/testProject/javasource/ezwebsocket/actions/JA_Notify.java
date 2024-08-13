@@ -11,11 +11,14 @@ package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
-import ezwebsocket.WebsocketUtils;
+import ezwebsocket.WebsocketManager;
 
 /**
- * Notifies all the clients subscribed to the context object with an action trigger
- * In the client widget, configure the action that should be executed
+ * Notify all subscribers to the context object/objectId
+ * Either an action or message (or both) should be configured
+ * - Action will be executed according to configuration in the client widget
+ * - Message will be passed to the configured message attribute
+ * - In case both are configured, the message will be set before the action is executed
  */
 public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 {
@@ -43,8 +46,7 @@ public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		WebsocketUtils.notify(objectId, action, message, websocketIdentifier);
-		return true;
+		return WebsocketManager.notify(objectId, action, message, websocketIdentifier);
 		// END USER CODE
 	}
 

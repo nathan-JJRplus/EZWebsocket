@@ -13,18 +13,27 @@ public class WrappedSession {
     public final Session session;
     private final String objectId;
     private final String onCloseMicroflowParameterValue;
-    
-    private final AtomicBoolean pongReceived;
-    private final Timer pingTimer;
+
+    private final long pingTime;
+    private final long pongTime;
+
+    private AtomicBoolean pongReceived;
+    private Timer pingTimer;
     private Timer pongTimer;
 
-    public WrappedSession(Session session, String objectId, String onCloseMicroflowParameterValue) {
+    public WrappedSession(Session session, String objectId, String onCloseMicroflowParameterValue, long pingTime,
+            long pongTime) {
         this.session = session;
         this.objectId = objectId;
+        this.pingTime = pingTime;
+        this.pongTime = pongTime;
         this.onCloseMicroflowParameterValue = onCloseMicroflowParameterValue;
-        this.pingTimer = new Timer(true);
-        this.pongReceived = new AtomicBoolean(true);
-        startPingTimer();
+
+        if (pingTime > 0) {
+            this.pingTimer = new Timer(true);
+            this.pongReceived = new AtomicBoolean(true);
+            startPingTimer();
+        }
     }
 
     public Session getSession() {
@@ -60,7 +69,7 @@ public class WrappedSession {
                     }
                 }
             }
-        }, 0, 5000); // 30-second interval
+        }, 0, pingTime);
     }
 
     private void startPongTimeout() {
@@ -75,7 +84,7 @@ public class WrappedSession {
                     closeSession();
                 }
             }
-        }, 10000);
+        }, pongTime);
     }
 
     public void handlePong() {

@@ -23,10 +23,14 @@ public class SessionManager {
     // The other list is for easy retrieval of a session which has just been closed
     private Map<Session, WrappedSession> sessions = new HashMap<Session, WrappedSession>();
 
-    public ILogNode LOG;
+    private ILogNode LOG;
+    private long pingTime;
+    private long pongTime;
 
-    public SessionManager(ILogNode LOG) {
+    public SessionManager(ILogNode LOG, long pingTime, long pongTime) {
         this.LOG = LOG;
+        this.pingTime = pingTime;
+        this.pongTime = pongTime;
         this.subscriptions = new HashMap<>();
         this.sessions = new HashMap<>();
     }
@@ -40,12 +44,13 @@ public class SessionManager {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Adding subscription: " + session.getId() + " for objectId: " + objectId);
         }
-        
+
         if (sessions.containsKey(session)) {
             throw new RuntimeException("Session already registered");
         }
         // Create wrappedSession object and place inside objectId subscription bucket
-        WrappedSession wrappedSession = new WrappedSession(session, objectId, onCloseMicroflowParameterValue);
+        WrappedSession wrappedSession = new WrappedSession(session, objectId, onCloseMicroflowParameterValue, pingTime,
+                pongTime);
         addSession(wrappedSession);
     }
 
@@ -54,14 +59,15 @@ public class SessionManager {
     }
 
     void notify(String objectId, String payload) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Notifying subscribers of " + objectId + ": " + payload);
+        }
         subscriptions.getOrDefault(objectId, Collections.emptyList())
                 .forEach(subscription -> {
                     try {
                         subscription.notify(payload);
                     } catch (RuntimeException re) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("RuntimeException while sending: " + re.getMessage());
-                        }
+                        LOG.error(re);
                     }
 
                 });

@@ -1,6 +1,7 @@
 package ezwebsocket;
 
 import javax.websocket.CloseReason;
+import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
@@ -15,25 +16,39 @@ import com.mendix.thirdparty.org.json.JSONException;
 import com.mendix.thirdparty.org.json.JSONObject;
 
 public class WebsocketEndpoint extends Endpoint {
-  public ILogNode LOG;
-  private long sessionTimeout;
+  private final ILogNode LOG;
+
+  private final long sessionTimeout;
+  private final boolean enableKeepalive;
+  public final long pingTime;
+  public final long pongTime;
+
   private boolean onCloseMicroflowEnabled = false;
   private String onCloseMicroflow;
   private String onCloseMicroflowParameterKey;
 
   private SessionManager sessionManager;
 
-  public WebsocketEndpoint(String websocketIdentifier, long sessionTimeout) {
+  public WebsocketEndpoint(String websocketIdentifier, long sessionTimeout, long pingTime, long pongTime) {
     super();
-    this.sessionTimeout = sessionTimeout;
+    this.sessionTimeout = sessionTimeout * 1000;
+    this.enableKeepalive = pingTime > 0;
+    this.pingTime = pingTime * 1000;
+    this.pongTime = pongTime * 1000;
     this.LOG = Core.getLogger(websocketIdentifier);
-    this.sessionManager = new SessionManager(LOG);
+    this.sessionManager = new SessionManager(LOG, this.pingTime, this.pongTime);
+    try {
+      // Initialize websocket server
+      Core.addWebSocketEndpoint('/' + websocketIdentifier, this);
+    } catch (DeploymentException de) {
+      LOG.error(de);
+    }
   }
 
-  public WebsocketEndpoint(String websocketIdentifier, long sessionTimeout,
+  public WebsocketEndpoint(String websocketIdentifier, long sessionTimeout, long pingTime, long pongTime,
       String onCloseMicroflow,
       String onCloseMicroflowParameterKey) {
-    this(websocketIdentifier, sessionTimeout);
+    this(websocketIdentifier, sessionTimeout, pingTime, pongTime);
     this.onCloseMicroflowEnabled = true;
     this.onCloseMicroflow = onCloseMicroflow;
     this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
@@ -41,39 +56,7 @@ public class WebsocketEndpoint extends Endpoint {
 
   @Override
   public void onOpen(Session session, EndpointConfig config) {
-    LOG.trace(config.getUserProperties().entrySet().toString());
-    session.setMaxIdleTimeout(sessionTimeout * 1000);
-    session.addMessageHandler(new MessageHandler.Whole<String>() {
-      @Override
-      public void onMessage(String data) {
-        try {
-          addSubscription(session, data);
-        } catch (RuntimeException e) {
-          try {
-            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage()));
-          } catch (IOException ioe) {
-            LOG.error(ioe);
-          }
-        }
-      }
-    });
-    session.addMessageHandler(new MessageHandler.Whole<PongMessage>() {
-      @Override
-      public void onMessage(PongMessage pongMessage) {
-        try {1
-          if (LOG.isTraceEnabled()) {
-            LOG.trace("Received pong for session " + session.getId());
-          }
-          sessionManager.handlePong(session);
-        } catch (RuntimeException e) {
-          try {
-            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage()));
-          } catch (IOException ioe) {
-            LOG.error(ioe);
-          }
-        }
-      }
-    });
+    handleNewConnection(session);
   }
 
   @Override
@@ -91,7 +74,50 @@ public class WebsocketEndpoint extends Endpoint {
     sessionManager.notify(objectId, payload);
   }
 
-  private void addSubscription(Session session, String jsonData) {
+  private void handleNewConnection(Session session) {
+    session.setMaxIdleTimeout(sessionTimeout);
+    session.addMessageHandler(new MessageHandler.Whole<String>() {
+      @Override
+      public void onMessage(String data) {
+        try {
+          if (LOG.isTraceEnabled()) {
+            LOG.trace("Received message: " + data);
+          }
+          registerSubscription(session, data);
+        } catch (RuntimeException e) {
+          LOG.error("Error occured while trying to add subscription", e);
+          try {
+            session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage()));
+          } catch (IOException ioe) {
+            LOG.error(ioe);
+          }
+        }
+      }
+    });
+    if (enableKeepalive) {
+      session.addMessageHandler(new MessageHandler.Whole<PongMessage>() {
+        @Override
+        public void onMessage(PongMessage pongMessage) {
+          try {
+            if (LOG.isTraceEnabled()) {
+              LOG.trace("Received pong for session " + session.getId());
+            }
+            sessionManager.handlePong(session);
+          } catch (RuntimeException e) {
+            LOG.error("Error occured while trying to handle pong", e);
+            try {
+              session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage()));
+            } catch (IOException ioe) {
+              LOG.error(ioe);
+            }
+          }
+        }
+      });
+    }
+
+  }
+
+  private void registerSubscription(Session session, String jsonData) {
     try {
       JSONObject json = new JSONObject(jsonData);
       String objectId = json.getString("objectId");
@@ -101,9 +127,9 @@ public class WebsocketEndpoint extends Endpoint {
       sessionManager.registerSubscription(session, csrfToken, objectId, onCloseMicroflowParameterValue);
 
     } catch (JSONException je) {
-      LOG.error("Error occured during parsing JSONdata: ", je);
+      throw new RuntimeException("Error occured during parsing JSONdata", je);
     } catch (RuntimeException re) {
-      throw new RuntimeException("Connection refused: " + re.getMessage());
+      throw new RuntimeException("Connection refused", re);
     }
   }
 
@@ -120,4 +146,5 @@ public class WebsocketEndpoint extends Endpoint {
     }
 
   }
+
 }
