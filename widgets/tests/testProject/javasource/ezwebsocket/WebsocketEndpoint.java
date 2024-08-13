@@ -4,6 +4,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
+import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import java.io.IOException;
@@ -46,14 +47,27 @@ public class WebsocketEndpoint extends Endpoint {
       @Override
       public void onMessage(String data) {
         try {
-          if (data.equals("pong")) {
-            sessionManager.handlePong(session);
-          } else {
-            addSubscription(session, data);
-          }
+          addSubscription(session, data);
         } catch (RuntimeException e) {
           try {
             session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage()));
+          } catch (IOException ioe) {
+            LOG.error(ioe);
+          }
+        }
+      }
+    });
+    session.addMessageHandler(new MessageHandler.Whole<PongMessage>() {
+      @Override
+      public void onMessage(PongMessage pongMessage) {
+        try {1
+          if (LOG.isTraceEnabled()) {
+            LOG.trace("Received pong for session " + session.getId());
+          }
+          sessionManager.handlePong(session);
+        } catch (RuntimeException e) {
+          try {
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage()));
           } catch (IOException ioe) {
             LOG.error(ioe);
           }

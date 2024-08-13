@@ -1,6 +1,7 @@
 package ezwebsocket;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,8 +51,13 @@ public class WrappedSession {
                     closeSession();
                 } else {
                     pongReceived.set(false);
-                    session.getAsyncRemote().sendText("ping");
-                    startPongTimeout();
+                    try {
+                        session.getAsyncRemote().sendPing(ByteBuffer.wrap(new byte[0]));
+                        startPongTimeout();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        closeSession();
+                    }
                 }
             }
         }, 0, 5000); // 30-second interval
