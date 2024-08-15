@@ -10,7 +10,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.Session;
 
 public class WrappedSession {
-    public final Session session;
+    private final Session session;
     private final String objectId;
     private final String onCloseMicroflowParameterValue;
 
@@ -64,7 +64,6 @@ public class WrappedSession {
                         session.getAsyncRemote().sendPing(ByteBuffer.wrap(new byte[0]));
                         startPongTimeout();
                     } catch (IOException e) {
-                        e.printStackTrace();
                         closeSession();
                     }
                 }

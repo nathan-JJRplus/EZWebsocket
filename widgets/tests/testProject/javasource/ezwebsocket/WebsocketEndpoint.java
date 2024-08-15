@@ -20,8 +20,8 @@ public class WebsocketEndpoint extends Endpoint {
 
   private final long sessionTimeout;
   private final boolean enableKeepalive;
-  public final long pingTime;
-  public final long pongTime;
+  private final long pingTime;
+  private final long pongTime;
 
   private boolean onCloseMicroflowEnabled = false;
   private String onCloseMicroflow;

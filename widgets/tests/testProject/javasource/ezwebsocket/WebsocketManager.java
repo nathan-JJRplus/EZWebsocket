@@ -14,7 +14,13 @@ public class WebsocketManager {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         if (sessionTimeout == null) {
-            throw new RuntimeException("sessionTimeout cannot be empty (use 0 for infinite sessions)");
+            throw new RuntimeException("sessionTimeout cannot be empty");
+        }
+        if (pingTime == null) {
+            throw new RuntimeException("pingTime cannot be empty");
+        }
+        if (pongTime == null) {
+            throw new RuntimeException("pongTime cannot be empty");
         }
         // Create websocket handler
         try {
@@ -35,7 +41,13 @@ public class WebsocketManager {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         if (sessionTimeout == null) {
-            throw new RuntimeException("sessionTimeout cannot be empty (use 0 for infinite sessions)");
+            throw new RuntimeException("sessionTimeout cannot be empty");
+        }
+        if (pingTime == null) {
+            throw new RuntimeException("pingTime cannot be empty");
+        }
+        if (pongTime == null) {
+            throw new RuntimeException("pongTime cannot be empty");
         }
         if (onCloseMicroflow == null || onCloseMicroflow.isEmpty()) {
             throw new RuntimeException("onCloseMicroflow cannot be empty");
