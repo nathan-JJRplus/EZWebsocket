@@ -10,6 +10,8 @@ import java.util.List;
 import com.mendix.core.Core;
 import com.mendix.core.CoreException;
 import com.mendix.logging.ILogNode;
+import com.mendix.systemwideinterfaces.core.IContext;
+import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 import javax.websocket.Session;
 import javax.websocket.CloseReason;
@@ -48,9 +50,10 @@ public class SessionManager {
         if (sessions.containsKey(session)) {
             throw new RuntimeException("Session already registered");
         }
+        
         // Create wrappedSession object and place inside objectId subscription bucket
-        WrappedSession wrappedSession = new WrappedSession(session, objectId, onCloseMicroflowParameterValue, pingTime,
-                pongTime);
+        WrappedSession wrappedSession = new WrappedSession(session, getUserObj(csrfToken), objectId,
+        		onCloseMicroflowParameterValue, pingTime, pongTime);
         addSession(wrappedSession);
     }
 
@@ -58,19 +61,32 @@ public class SessionManager {
         sessions.get(session).handlePong();
     }
 
-    void notify(String objectId, String payload) {
+    void notify(String objectId, List<system.proxies.User> notifyList, String payload) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Notifying subscribers of " + objectId + ": " + payload);
         }
-        subscriptions.getOrDefault(objectId, Collections.emptyList())
-                .forEach(subscription -> {
-                    try {
-                        subscription.notify(payload);
-                    } catch (RuntimeException re) {
-                        LOG.error(re);
-                    }
+        if (notifyList.size() == 0) {
+            subscriptions.getOrDefault(objectId, Collections.emptyList())
+            .forEach(subscription -> {
+                try {
+                    subscription.notify(payload);
+                } catch (RuntimeException re) {
+                    LOG.error(re);
+                }
+            });
+        } else {
+            subscriptions.getOrDefault(objectId, Collections.emptyList())
+            .forEach(subscription -> {
+                try {
+                	if (notifyList.contains(subscription.GetUserObj())) {
+                		subscription.notify(payload);
+                	}                    
+                } catch (RuntimeException re) {
+                    LOG.error(re);
+                }
+            });
+        }
 
-                });
     }
 
     private void addSession(WrappedSession wrappedSession) {
@@ -124,6 +140,23 @@ public class SessionManager {
         } catch (CoreException ce) {
             throw new RuntimeException(ce);
         }
+    }
+    
+    private system.proxies.User getUserObj(String csrfToken) {
+    	try {
+        	if (csrfToken.contains("'")) { // check if a malicious user is trying to escape the query with a single quote
+        		throw new RuntimeException("Invalid CSRF Token. Token cannot contain a single quote.");
+        	}
+        	IContext context = Core.createSystemContext();
+        	List<IMendixObject> userList = Core.createXPathQuery( String.format("//System.User[System.Session_User/System.Session/CSRFToken = '%s']", csrfToken))
+        				.setAmount(1).execute(context);
+        	if (userList.size() == 0) {
+        		throw new RuntimeException("No user found for session " + csrfToken);
+        	}
+			return system.proxies.User.load(context, userList.get(0).getId());
+		} catch (CoreException e) {
+			throw new RuntimeException(e);
+		}
     }
 
 }

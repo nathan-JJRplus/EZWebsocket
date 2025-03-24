@@ -2,6 +2,7 @@ package ezwebsocket;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 public class WebsocketManager {
     // Map containing all registered websockets, identified by its
@@ -69,7 +70,7 @@ public class WebsocketManager {
         return true;
     }
 
-    public static boolean notify(String objectId, String action, String message, String websocketIdentifier) {
+    public static boolean notify(String objectId, List<system.proxies.User> notifyList, String action, String message, String websocketIdentifier) {
         if (objectId == null || objectId.isEmpty()) {
             throw new RuntimeException("objectId cannot be empty");
         }
@@ -80,7 +81,7 @@ public class WebsocketManager {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         try {
-            getWebsocket(websocketIdentifier).notify(objectId, action, message);
+            getWebsocket(websocketIdentifier).notify(objectId, notifyList, action, message);
         } catch (RuntimeException re) {
             return false;
         }

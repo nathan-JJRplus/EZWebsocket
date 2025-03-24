@@ -9,6 +9,7 @@ import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.mendix.core.Core;
 import com.mendix.logging.ILogNode;
@@ -64,14 +65,14 @@ public class WebsocketEndpoint extends Endpoint {
     removeSubscription(session, closeReason);
   }
 
-  void notify(String objectId, String action, String message) {
+  void notify(String objectId, List<system.proxies.User> notifyList, String action, String message) {
     // Construct message
     JSONObject payloadJSON = new JSONObject();
     payloadJSON.put("action", action);
     payloadJSON.put("message", message);
     String payload = payloadJSON.toString();
 
-    sessionManager.notify(objectId, payload);
+    sessionManager.notify(objectId, notifyList, payload);
   }
 
   private void handleNewConnection(Session session) {

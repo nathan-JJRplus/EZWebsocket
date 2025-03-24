@@ -11,6 +11,7 @@ import javax.websocket.Session;
 
 public class WrappedSession {
     private final Session session;
+    private final system.proxies.User userObj;
     private final String objectId;
     private final String onCloseMicroflowParameterValue;
 
@@ -21,9 +22,10 @@ public class WrappedSession {
     private Timer pingTimer;
     private Timer pongTimer;
 
-    public WrappedSession(Session session, String objectId, String onCloseMicroflowParameterValue, long pingTime,
+    public WrappedSession(Session session, system.proxies.User userObj, String objectId, String onCloseMicroflowParameterValue, long pingTime,
             long pongTime) {
         this.session = session;
+        this.userObj = userObj;
         this.objectId = objectId;
         this.pingTime = pingTime;
         this.pongTime = pongTime;
@@ -106,4 +108,5 @@ public class WrappedSession {
         }
     }
 
+    public system.proxies.User GetUserObj() {return this.userObj; }
 }

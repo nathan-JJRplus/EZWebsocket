@@ -9,9 +9,12 @@
 
 package ezwebsocket.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.IMendixObject;
 
 /**
  * Notify all subscribers to the context object/objectId
@@ -20,19 +23,24 @@ import ezwebsocket.WebsocketManager;
  * - Message will be passed to the configured message attribute
  * - In case both are configured, the message will be set before the action is executed
  */
-public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
+public class JA_Notify_Specific extends CustomJavaAction<java.lang.Boolean>
 {
 	private final java.lang.String websocketIdentifier;
 	private final java.lang.String objectId;
 	private final java.lang.String action;
 	private final java.lang.String message;
+	/** @deprecated use UserToNotify.getMendixObject() instead. */
+	@java.lang.Deprecated(forRemoval = true)
+	private final IMendixObject __UserToNotify;
+	private final system.proxies.User UserToNotify;
 
-	public JA_Notify(
+	public JA_Notify_Specific(
 		IContext context,
 		java.lang.String _websocketIdentifier,
 		java.lang.String _objectId,
 		java.lang.String _action,
-		java.lang.String _message
+		java.lang.String _message,
+		IMendixObject _userToNotify
 	)
 	{
 		super(context);
@@ -40,13 +48,20 @@ public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 		this.objectId = _objectId;
 		this.action = _action;
 		this.message = _message;
+		this.__UserToNotify = _userToNotify;
+		this.UserToNotify = _userToNotify == null ? null : system.proxies.User.initialize(getContext(), _userToNotify);
 	}
 
 	@java.lang.Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		return WebsocketManager.notify(objectId, action, message, websocketIdentifier);
+		if (this.UserToNotify == null) {
+			throw new RuntimeException("JA_Notify_Specifc - User to Notify parameter cannot be null");
+		}
+		List<system.proxies.User> notifyList = new ArrayList<system.proxies.User>();
+		notifyList.add(this.UserToNotify);
+		return WebsocketManager.notify(objectId, notifyList, action, message, websocketIdentifier);
 		// END USER CODE
 	}
 
@@ -57,7 +72,7 @@ public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 	@java.lang.Override
 	public java.lang.String toString()
 	{
-		return "JA_Notify";
+		return "JA_Notify_Specific";
 	}
 
 	// BEGIN EXTRA CODE
