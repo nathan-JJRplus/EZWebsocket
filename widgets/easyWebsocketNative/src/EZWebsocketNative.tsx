@@ -1,5 +1,5 @@
 import { MutableRefObject, useEffect, useRef } from "react";
-import { TextStyle, ViewStyle } from "react-native";
+import { TextStyle, ViewStyle, AppState, AppStateStatus } from "react-native";
 
 import { Style } from "@mendix/pluggable-widgets-tools";
 
@@ -30,14 +30,7 @@ export function EZWebsocketNative({
         // Check if there is no open connection already
         if (
             connection.current === null &&
-            // Make sure all values are initiated
-            objectId.status === "available" &&
-            websocketIdentifier.status === "available" &&
-            (!messageAttribute || messageAttribute.status === "available") &&
-            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
-            (!actionConfig || !actionConfig.find(config => {
-                return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
-            }))
+            canStartConnection()
         ) {
             startConnection();
         }
@@ -45,9 +38,25 @@ export function EZWebsocketNative({
 
     useEffect(() => {
         return () => {
-            // Close connection on unmount
+            // Close connection on unmount and empty connection ref so we can reconnect on remount
             connection.current?.close();
+            connection.current = null;
         };
+    }, []);
+
+    useEffect(() => { 
+        //Add EventListener for AppState changes to be able to reconnect when the app comes back from background and connection was silently closed
+        const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
+        if (nextState === "active") {
+            if (canStartConnection()) {
+                reconnect();
+            } else {
+                console.debug("Skipped reconnect on resume: parameters not ready yet");
+            }
+        }
+        });
+
+        return () => sub.remove();
     }, []);
 
     const startConnection = () => {
@@ -79,6 +88,10 @@ export function EZWebsocketNative({
 
         ws.onclose = event => {
             console.debug(event);
+
+            // Mark as closed so we can reconnect
+            connection.current = null;
+
             // Timeout event
             if (event.code === 1001 && timeoutAction && timeoutAction.canExecute) {
                 timeoutAction.execute();
@@ -127,6 +140,33 @@ export function EZWebsocketNative({
             messageAttribute.setValue(message);
         };
     };
+
+    const reconnect = () => { 
+        // If there is an existing socket, close it first
+        if (connection.current && connection.current.readyState !== WebSocket.CLOSED) {
+            try {
+                connection.current.close();
+            } catch (e) {
+                console.warn("Error while closing WS before reconnect", e);
+            }
+        }
+        connection.current = null;
+        startConnection();
+    };
+
+    const canStartConnection = (): boolean => {
+    return (
+        // Make sure all values are initiated. Made into reusable function as it is used in multiple places now
+        objectId.status === "available" &&
+        websocketIdentifier.status === "available" &&
+        (!messageAttribute || messageAttribute.status === "available") &&
+        (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
+        (!actionConfig ||
+            !actionConfig.find(config => {
+                return config.action?.canExecute == false;
+            }))
+    );
+};
 
     return null;
 }
