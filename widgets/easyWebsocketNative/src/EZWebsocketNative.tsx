@@ -1,5 +1,5 @@
 import { MutableRefObject, useEffect, useRef } from "react";
-import { TextStyle, ViewStyle } from "react-native";
+import { TextStyle, ViewStyle, AppState, AppStateStatus } from "react-native";
 
 import { Style } from "@mendix/pluggable-widgets-tools";
 
@@ -28,32 +28,50 @@ export function EZWebsocketNative({
 
     useEffect(() => {
         // Check if there is no open connection already
-        if (
-            connection.current === null &&
-            // Make sure all values are initiated
-            objectId.status === "available" &&
-            websocketIdentifier.status === "available" &&
-            (!messageAttribute || messageAttribute.status === "available") &&
-            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
-            (!actionConfig || !actionConfig.find(config => {
-                return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
-            }))
-        ) {
+        if (connection.current === null && canStartConnection()) {
             startConnection();
         }
+    }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue, actionConfig]);
+
+    useEffect(() => {
+        //Add EventListener for AppState changes to be able to reconnect when the app comes back from background and connection was silently closed
+        const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
+            console.debug(`AppState change: ${nextState} | wsRef=${connection.current ? "set" : "null"}`);
+            if (nextState === "active") {
+                const ws = connection.current;
+                const rs = ws?.readyState;
+
+                if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING || !canStartConnection()) return;
+
+                try {
+                    ws?.close();
+                } catch {}
+                connection.current = null;
+                startConnection();
+            }
+        });
+
+        return () => sub.remove();
     }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue, actionConfig]);
 
     useEffect(() => {
         return () => {
             // Close connection on unmount
             connection.current?.close();
+            connection.current = null;
         };
     }, []);
 
     const startConnection = () => {
+        //Extra guardrail
+        const rs = connection.current?.readyState;
+        if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING) return;
         // Open websocket connection
+        console.debug(`Starting connection: ${websocketIdentifier.value} - ${objectId.value}`);
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
         const ws = new WebSocket(global.mx.remoteUrl.replace(/http/, "ws") + websocketIdentifier.value);
+        // Store connection inside ref so we can keep track through rendercycles
+        connection.current = ws;
 
         ws.onopen = _event => {
             // Send objectId, csrftoken and onCloseMicroflowParamterValue to wsserver on opening of connection
@@ -87,10 +105,10 @@ export function EZWebsocketNative({
             if (event.code === 1005 && navigateAction && navigateAction.canExecute) {
                 navigateAction.execute();
             }
+            if (connection.current === ws) {
+                connection.current = null;
+            }
         };
-
-        // Store connection inside ref so we can keep track through rendercycles
-        connection.current = ws;
 
         const executeAction = (action: string) => {
             if (!action) {
@@ -126,6 +144,19 @@ export function EZWebsocketNative({
             }
             messageAttribute.setValue(message);
         };
+    };
+
+    const canStartConnection = () => {
+        return (
+            objectId.status === "available" &&
+            websocketIdentifier.status === "available" &&
+            (!messageAttribute || messageAttribute.status === "available") &&
+            (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
+            (!actionConfig ||
+                !actionConfig.find(config => {
+                    return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
+                }))
+        );
     };
 
     return null;
