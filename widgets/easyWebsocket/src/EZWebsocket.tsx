@@ -29,9 +29,10 @@ export function EZWebsocket({
             websocketIdentifier.status === "available" &&
             (!messageAttribute || messageAttribute.status === "available") &&
             (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
-            (!actionConfig || !actionConfig.find(config => {
-                return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
-            }))
+            (!actionConfig ||
+                !actionConfig.find(config => {
+                    return config.action?.canExecute === false; // This check ensures parameters from Datasource flows are available in actions
+                }))
         ) {
             startConnection();
         }
@@ -73,18 +74,24 @@ export function EZWebsocket({
 
         ws.onclose = event => {
             console.debug(event);
-            // Timeout event
-            if (event.code === 1001 && timeoutAction && timeoutAction.canExecute) {
+            // Timeout event (server-side ping/pong detected dead connection)
+            if (
+                (event.code === 1001 || event.code === 1006 || event.code === 1008 || event.code === 1011) &&
+                timeoutAction &&
+                timeoutAction.canExecute
+            ) {
                 timeoutAction.execute();
             }
-            // Navigate away/close page/unrender event
+
             if (event.code === 1005 && navigateAction && navigateAction.canExecute) {
                 navigateAction.execute();
             }
         };
 
         // Store connection inside ref so we can keep track through rendercycles
-        connection.current = ws;
+        if (connection.current === ws) {
+            connection.current = null;
+        }
 
         const executeAction = (action: string) => {
             if (!action) {

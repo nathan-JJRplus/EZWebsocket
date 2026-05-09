@@ -39,6 +39,8 @@ export interface EZWebsocketPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode: "design" | "xray" | "structure";
+    translate: (text: string) => string;
     websocketIdentifier: string;
     objectId: string;
     actionConfig: ActionConfigPreviewType[];
