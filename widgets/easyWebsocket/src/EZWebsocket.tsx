@@ -49,13 +49,14 @@ export function EZWebsocket({
         // Open websocket connection
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
         const ws = new WebSocket(window.mx.appUrl.replace(/http/, "ws") + websocketIdentifier.value);
+        // Store connection inside ref so we can keep track through rendercycles
+        connection.current = ws;
 
         ws.onopen = _event => {
             // Send objectId, csrftoken and onCloseMicroflowParamterValue to wsserver on opening of connection
             // to connect the current session to the object
             const parameters = {
                 objectId: objectId.value,
-                csrfToken: window.mx.session.getConfig("csrftoken"),
                 onCloseMicroflowParameterValue: onCloseMicroflowParameterValue?.value
             };
             ws.send(JSON.stringify(parameters));
@@ -86,12 +87,11 @@ export function EZWebsocket({
             if (event.code === 1005 && navigateAction && navigateAction.canExecute) {
                 navigateAction.execute();
             }
-        };
 
-        // Store connection inside ref so we can keep track through rendercycles
-        if (connection.current === ws) {
-            connection.current = null;
-        }
+            if (ws === connection.current) {
+                connection.current = null;
+            }
+        };
 
         const executeAction = (action: string) => {
             if (!action) {

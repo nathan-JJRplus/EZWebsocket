@@ -27,6 +27,11 @@ Allow for real-time server to client communication using websockets without exte
   - Removed sessionTimeout parameter from easy websocket initialization for even easier websocket initialization
   - Added advanced websocket initialization for tweaking session timing parameters
 
+- ✅ **v3.0.0 scalability improvements**
+  - Solved concurrency/scaling issues
+  - Reworked session validation
+  - Upgraded app base to Mx 10.24.0
+
 ## Usage
 
 ### Initialize webserver

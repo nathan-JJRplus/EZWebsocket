@@ -10,8 +10,8 @@
 package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
 /**
  * Notify all subscribers to the context object/objectId
@@ -20,20 +20,26 @@ import ezwebsocket.WebsocketManager;
  * - Message will be passed to the configured message attribute
  * - In case both are configured, the message will be set before the action is executed
  */
-public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
+public class JA_Notify extends UserAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.String objectId;
-	private java.lang.String action;
-	private java.lang.String message;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.String objectId;
+	private final java.lang.String action;
+	private final java.lang.String message;
 
-	public JA_Notify(IContext context, java.lang.String websocketIdentifier, java.lang.String objectId, java.lang.String action, java.lang.String message)
+	public JA_Notify(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.String _objectId,
+		java.lang.String _action,
+		java.lang.String _message
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.objectId = objectId;
-		this.action = action;
-		this.message = message;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.objectId = _objectId;
+		this.action = _action;
+		this.message = _message;
 	}
 
 	@java.lang.Override

@@ -10,9 +10,9 @@
 package ezwebsocketmultiinstance.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
-public class JA_GetXASid extends CustomJavaAction<java.lang.String>
+public class JA_GetXASid extends UserAction<java.lang.String>
 {
 	public JA_GetXASid(IContext context)
 	{

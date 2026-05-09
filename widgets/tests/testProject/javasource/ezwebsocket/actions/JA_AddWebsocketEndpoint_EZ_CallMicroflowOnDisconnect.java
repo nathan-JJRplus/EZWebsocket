@@ -10,8 +10,8 @@
 package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
 /**
  * Use this for a simple websocket server + Configure a microflow to be executed when a client disconnects
@@ -27,18 +27,23 @@ import ezwebsocket.WebsocketManager;
  * > Configure the name of this string parameter
  * > Pass the parameter using the Websocket Close Behaviour tab on the client widget
  */
-public class JA_AddWebsocketEndpoint_EZ_CallMicroflowOnDisconnect extends CustomJavaAction<java.lang.Boolean>
+public class JA_AddWebsocketEndpoint_EZ_CallMicroflowOnDisconnect extends UserAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.String onCloseMicroflow;
-	private java.lang.String onCloseMicroflowParameterKey;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.String onCloseMicroflow;
+	private final java.lang.String onCloseMicroflowParameterKey;
 
-	public JA_AddWebsocketEndpoint_EZ_CallMicroflowOnDisconnect(IContext context, java.lang.String websocketIdentifier, java.lang.String onCloseMicroflow, java.lang.String onCloseMicroflowParameterKey)
+	public JA_AddWebsocketEndpoint_EZ_CallMicroflowOnDisconnect(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.String _onCloseMicroflow,
+		java.lang.String _onCloseMicroflowParameterKey
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.onCloseMicroflow = onCloseMicroflow;
-		this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.onCloseMicroflow = _onCloseMicroflow;
+		this.onCloseMicroflowParameterKey = _onCloseMicroflowParameterKey;
 	}
 
 	@java.lang.Override

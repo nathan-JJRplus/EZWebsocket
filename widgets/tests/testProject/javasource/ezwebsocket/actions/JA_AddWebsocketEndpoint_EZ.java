@@ -10,8 +10,8 @@
 package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
 /**
  * Use this for a simple websocket server
@@ -20,14 +20,17 @@ import ezwebsocket.WebsocketManager;
  *     - Pings client every 30 seconds
  *     - Timeout after 10 seconds
  */
-public class JA_AddWebsocketEndpoint_EZ extends CustomJavaAction<java.lang.Boolean>
+public class JA_AddWebsocketEndpoint_EZ extends UserAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
+	private final java.lang.String websocketIdentifier;
 
-	public JA_AddWebsocketEndpoint_EZ(IContext context, java.lang.String websocketIdentifier)
+	public JA_AddWebsocketEndpoint_EZ(
+		IContext context,
+		java.lang.String _websocketIdentifier
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
+		this.websocketIdentifier = _websocketIdentifier;
 	}
 
 	@java.lang.Override

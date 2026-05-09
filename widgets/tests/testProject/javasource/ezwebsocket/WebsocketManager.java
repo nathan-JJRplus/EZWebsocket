@@ -1,12 +1,12 @@
 package ezwebsocket;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebsocketManager {
     // Map containing all registered websockets, identified by its
     // websocketidentifier/path
-    private static Map<String, WebsocketEndpoint> websockets = new HashMap<String, WebsocketEndpoint>();
+    private static Map<String, WebsocketEndpoint> websockets = new ConcurrentHashMap<String, WebsocketEndpoint>();
 
     public static boolean addWebsocketEndpoint(String websocketIdentifier, Long sessionTimeout, Long pingTime,
             Long pongTime) {

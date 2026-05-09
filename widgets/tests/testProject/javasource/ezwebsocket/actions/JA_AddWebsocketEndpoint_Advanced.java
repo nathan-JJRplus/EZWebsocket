@@ -10,8 +10,8 @@
 package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
 /**
  * Use this if you need custom timeout settings
@@ -23,20 +23,26 @@ import ezwebsocket.WebsocketManager;
  * - The server will disconnect the client after not receiving a response after <pongTime> seconds
  * > Setting pingTime to 0 (or negative) will turn off the keepalive mechanism and clients will timeout after <sessionTimeout> seconds
  */
-public class JA_AddWebsocketEndpoint_Advanced extends CustomJavaAction<java.lang.Boolean>
+public class JA_AddWebsocketEndpoint_Advanced extends UserAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.Long sessionTimeout;
-	private java.lang.Long pingTime;
-	private java.lang.Long pongTime;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.Long sessionTimeout;
+	private final java.lang.Long pingTime;
+	private final java.lang.Long pongTime;
 
-	public JA_AddWebsocketEndpoint_Advanced(IContext context, java.lang.String websocketIdentifier, java.lang.Long sessionTimeout, java.lang.Long pingTime, java.lang.Long pongTime)
+	public JA_AddWebsocketEndpoint_Advanced(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.Long _sessionTimeout,
+		java.lang.Long _pingTime,
+		java.lang.Long _pongTime
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.sessionTimeout = sessionTimeout;
-		this.pingTime = pingTime;
-		this.pongTime = pongTime;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.sessionTimeout = _sessionTimeout;
+		this.pingTime = _pingTime;
+		this.pongTime = _pongTime;
 	}
 
 	@java.lang.Override

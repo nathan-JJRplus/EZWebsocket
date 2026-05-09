@@ -9,8 +9,10 @@ import javax.websocket.PongMessage;
 import javax.websocket.Session;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import com.mendix.core.Core;
+import com.mendix.systemwideinterfaces.core.ISession;
 import com.mendix.logging.ILogNode;
 import com.mendix.thirdparty.org.json.JSONException;
 import com.mendix.thirdparty.org.json.JSONObject;
@@ -56,6 +58,17 @@ public class WebsocketEndpoint extends Endpoint {
 
   @Override
   public void onOpen(Session session, EndpointConfig config) {
+    try {
+      isValidSession(config);
+    } catch (RuntimeException re) {
+      LOG.error("Error occured while trying to validate session", re);
+      try {
+        session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, re.getMessage()));
+      } catch (IOException ioe) {
+        LOG.error(ioe);
+      }
+      return;
+    }
     handleNewConnection(session);
   }
 
@@ -117,14 +130,27 @@ public class WebsocketEndpoint extends Endpoint {
 
   }
 
+  private boolean isValidSession(EndpointConfig config) {
+    // Get session id from config
+    String mxSessionId = (String) config.getUserProperties().get("mxSessionId");
+    if (mxSessionId == null || mxSessionId.isEmpty()) {
+      throw new RuntimeException("Not authenticated");
+    }
+    // Validate session id
+    ISession session = Core.getSessionById(UUID.fromString(mxSessionId));
+    if (session == null) {
+      throw new RuntimeException("No active session found for sessionId");
+    }
+    return true;
+  }
+
   private void registerSubscription(Session session, String jsonData) {
     try {
       JSONObject json = new JSONObject(jsonData);
       String objectId = json.getString("objectId");
-      String csrfToken = json.getString("csrfToken");
       String onCloseMicroflowParameterValue = json.optString("onCloseMicroflowParameterValue");
 
-      sessionManager.registerSubscription(session, csrfToken, objectId, onCloseMicroflowParameterValue);
+      sessionManager.registerSubscription(session, objectId, onCloseMicroflowParameterValue);
 
     } catch (JSONException je) {
       throw new RuntimeException("Error occured during parsing JSONdata", je);

@@ -10,8 +10,8 @@
 package ezwebsocket.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
-import com.mendix.webui.CustomJavaAction;
 import ezwebsocket.WebsocketManager;
+import com.mendix.systemwideinterfaces.core.UserAction;
 
 /**
  * Use this if you need custom timeout settings + Configure a microflow to be executed when a client disconnects
@@ -31,24 +31,32 @@ import ezwebsocket.WebsocketManager;
  * > Pass the parameter using the Websocket Close Behaviour tab on the client widget
  * 
  */
-public class JA_AddWebsocketEndpoint_Advanced_CallMicroflowOnDisconnect extends CustomJavaAction<java.lang.Boolean>
+public class JA_AddWebsocketEndpoint_Advanced_CallMicroflowOnDisconnect extends UserAction<java.lang.Boolean>
 {
-	private java.lang.String websocketIdentifier;
-	private java.lang.Long sessionTimeout;
-	private java.lang.Long pingTime;
-	private java.lang.Long pongTime;
-	private java.lang.String onCloseMicroflow;
-	private java.lang.String onCloseMicroflowParameterKey;
+	private final java.lang.String websocketIdentifier;
+	private final java.lang.Long sessionTimeout;
+	private final java.lang.Long pingTime;
+	private final java.lang.Long pongTime;
+	private final java.lang.String onCloseMicroflow;
+	private final java.lang.String onCloseMicroflowParameterKey;
 
-	public JA_AddWebsocketEndpoint_Advanced_CallMicroflowOnDisconnect(IContext context, java.lang.String websocketIdentifier, java.lang.Long sessionTimeout, java.lang.Long pingTime, java.lang.Long pongTime, java.lang.String onCloseMicroflow, java.lang.String onCloseMicroflowParameterKey)
+	public JA_AddWebsocketEndpoint_Advanced_CallMicroflowOnDisconnect(
+		IContext context,
+		java.lang.String _websocketIdentifier,
+		java.lang.Long _sessionTimeout,
+		java.lang.Long _pingTime,
+		java.lang.Long _pongTime,
+		java.lang.String _onCloseMicroflow,
+		java.lang.String _onCloseMicroflowParameterKey
+	)
 	{
 		super(context);
-		this.websocketIdentifier = websocketIdentifier;
-		this.sessionTimeout = sessionTimeout;
-		this.pingTime = pingTime;
-		this.pongTime = pongTime;
-		this.onCloseMicroflow = onCloseMicroflow;
-		this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
+		this.websocketIdentifier = _websocketIdentifier;
+		this.sessionTimeout = _sessionTimeout;
+		this.pingTime = _pingTime;
+		this.pongTime = _pongTime;
+		this.onCloseMicroflow = _onCloseMicroflow;
+		this.onCloseMicroflowParameterKey = _onCloseMicroflowParameterKey;
 	}
 
 	@java.lang.Override

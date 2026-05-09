@@ -34,18 +34,22 @@ export function EZWebsocketNative({
     }, [objectId, websocketIdentifier, messageAttribute, onCloseMicroflowParameterValue, actionConfig]);
 
     useEffect(() => {
-        //Add EventListener for AppState changes to be able to reconnect when the app comes back from background and connection was silently closed
+        // Add EventListener for AppState changes to be able to reconnect when the app comes back from background and connection was silently closed
         const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
             console.debug(`AppState change: ${nextState} | wsRef=${connection.current ? "set" : "null"}`);
             if (nextState === "active") {
                 const ws = connection.current;
                 const rs = ws?.readyState;
 
-                if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING || !canStartConnection()) return;
+                if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING || !canStartConnection()) {
+                    return;
+                }
 
                 try {
                     ws?.close();
-                } catch {}
+                } catch {
+                    console.error("Error while closing websocket connection");
+                }
                 connection.current = null;
                 startConnection();
             }
@@ -63,9 +67,11 @@ export function EZWebsocketNative({
     }, []);
 
     const startConnection = () => {
-        //Extra guardrail
+        // Extra guardrail
         const rs = connection.current?.readyState;
-        if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING) return;
+        if (rs === WebSocket.OPEN || rs === WebSocket.CONNECTING) {
+            return;
+        }
         // Open websocket connection
         console.debug(`Starting connection: ${websocketIdentifier.value} - ${objectId.value}`);
         // The replace action makes sure that applications without ssl connect to ws:// and with ssl connect to wss://
@@ -78,7 +84,6 @@ export function EZWebsocketNative({
             // to connect the current session to the object
             const parameters = {
                 objectId: objectId.value,
-                csrfToken: global.mx.session.sessionData.csrftoken,
                 onCloseMicroflowParameterValue: onCloseMicroflowParameterValue?.value
             };
             ws.send(JSON.stringify(parameters));
@@ -97,14 +102,19 @@ export function EZWebsocketNative({
 
         ws.onclose = event => {
             console.debug(event);
-            // Timeout event
-            if (event.code === 1001 && timeoutAction && timeoutAction.canExecute) {
+            // Timeout event (server-side ping/pong detected dead connection)
+            if (
+                (event.code === 1001 || event.code === 1006 || event.code === 1008 || event.code === 1011) &&
+                timeoutAction &&
+                timeoutAction.canExecute
+            ) {
                 timeoutAction.execute();
             }
-            // Navigate away/close page/unrender event
+
             if (event.code === 1005 && navigateAction && navigateAction.canExecute) {
                 navigateAction.execute();
             }
+
             if (connection.current === ws) {
                 connection.current = null;
             }
@@ -154,7 +164,7 @@ export function EZWebsocketNative({
             (!onCloseMicroflowParameterValue || onCloseMicroflowParameterValue.status === "available") &&
             (!actionConfig ||
                 !actionConfig.find(config => {
-                    return config.action?.canExecute == false; //This check ensures parameters from Datasource flows are available in actions
+                    return config.action?.canExecute === false; // This check ensures parameters from Datasource flows are available in actions
                 }))
         );
     };
